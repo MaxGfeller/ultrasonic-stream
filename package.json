@@ -1,0 +1,16 @@
+{
+  "name": "ultrasonic-stream",
+  "version": "0.0.1",
+  "description": "Streams over ultrasonic sound-waves.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "base64-encode": "~1.0.1",
+    "through": "~2.3.4"
+  }
+}
