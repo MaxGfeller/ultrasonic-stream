@@ -1,22 +1,24 @@
 'use strict';
 
 var fs = require('fs');
+var ultrasonic = require('../index.js');
 
-var ultrasonic = new (require('../index.js'))({
-	freqMin: 200,
-	freqMax: 600,
-	toneLength: 0.5
+ultrasonic.configure({
+	freqMin: 16000,
+	freqMax: 19000,
+	toneLength: 0.04
 });
 
 var writeStream = ultrasonic.createWriteStream();
 
 writeStream.write('Hello');
 writeStream.write('World');
-writeStream.write('What');
-writeStream.write('the');
-writeStream.write('fuck');
-writeStream.write('is');
-writeStream.write('going');
-writeStream.write('on');
+writeStream.write('one');
+writeStream.write('two');
+writeStream.write('three');
 
-writeStream.end();
+setTimeout(function() {
+	writeStream.write('four');
+	writeStream.end();
+}, 8000);
+
