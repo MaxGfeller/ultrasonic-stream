@@ -11,6 +11,7 @@
   "license": "BSD",
   "dependencies": {
     "base64-encode": "~1.0.1",
-    "through": "~2.3.4"
+    "through": "~2.3.4",
+    "base64-decode": "~1.0.2"
   }
 }
