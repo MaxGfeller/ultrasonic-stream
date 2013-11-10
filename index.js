@@ -5,21 +5,31 @@ var base64encode = require('base64-encode');
 var Stream = require('stream');
 
 
-var ultrasonic = function(opts) {
-	if(!opts) opts = {};
-
-	this.startChar = opts.startChar || '^';
-	this.endChar = opts.endChar || '$';
-	this.initTransferChar = opts.initTransferChar || '?';
-	this.endTransferChar = opts.endTransferChar || '*';
-	this.charList = opts.charList || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';
-	this.toneLength = opts.toneLength || 0.03;
-	this.freqMin = opts.freqMin || 18000;
-	this.freqMax = opts.freqMax || 20000;
-	this.chunkSize = opts.chunkSize || 8;
+var ultrasonic = function() {
+	this.startChar = '^';
+	this.endChar = '$';
+	this.initTransferChar = '?';
+	this.endTransferChar = '*';
+	this.charList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';
+	this.toneLength = 0.03;
+	this.freqMin = 18000;
+	this.freqMax = 20000;
+	this.chunkSize = 8;
 
 	// append special characters to charList
 	this.charList = this.startChar + this.initTransferChar + this.charList + this.endChar + this.endTransferChar;
+}
+
+ultrasonic.prototype.configure = function(opts) {
+	var possibleOpts = ['startChar', 'endChar', 'initTransferChar', 'endTransferChar', 'charList', 'toneLength', 'freqMin', 'freqMax', 'chunkSize'];
+
+	for(var i = 0; i < possibleOpts.length; i++) {
+		var opt = possibleOpts[i];
+
+		if(opts[opt]) {
+			this[opt] = opts[opt];
+		}
+	}
 }
 
 ultrasonic.prototype._charToFreq = function(char) {
@@ -58,7 +68,7 @@ ultrasonic.prototype.sendChar = function(char, cb) {
 	var cmd = 'play -n synth ' + this.toneLength + ' sin ' + freq;
 
 	console.log(char);
-	
+
 
 	exec(cmd, function(err, stdout, stderr) {
       cb();
@@ -117,4 +127,4 @@ ultrasonic.prototype.createWriteStream = function() {
 	return stream;
 }
 
-module.exports = ultrasonic;
+module.exports = new ultrasonic();
