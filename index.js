@@ -4,8 +4,7 @@ var exec = require('child_process').exec;
 var base64encode = require('base64-encode');
 var Stream = require('stream');
 
-
-var ultrasonic = function() {
+var Ultrasonic = function() {
 	this.startChar = '^';
 	this.endChar = '$';
 	this.initTransferChar = '?';
@@ -20,8 +19,18 @@ var ultrasonic = function() {
 	this.charList = this.startChar + this.initTransferChar + this.charList + this.endChar + this.endTransferChar;
 }
 
-ultrasonic.prototype.configure = function(opts) {
-	var possibleOpts = ['startChar', 'endChar', 'initTransferChar', 'endTransferChar', 'charList', 'toneLength', 'freqMin', 'freqMax', 'chunkSize'];
+Ultrasonic.prototype.configure = function(opts) {
+	var possibleOpts = [
+		'startChar',
+		'endChar',
+		'initTransferChar',
+		'endTransferChar',
+		'charList',
+		'toneLength',
+		'freqMin',
+		'freqMax',
+		'chunkSize'
+	];
 
 	for(var i = 0; i < possibleOpts.length; i++) {
 		var opt = possibleOpts[i];
@@ -32,7 +41,7 @@ ultrasonic.prototype.configure = function(opts) {
 	}
 }
 
-ultrasonic.prototype._charToFreq = function(char) {
+Ultrasonic.prototype._charToFreq = function(char) {
 	var index = this.charList.indexOf(char);
 
 	if(index === -1) {
@@ -47,15 +56,14 @@ ultrasonic.prototype._charToFreq = function(char) {
 	return this.freqMin + freqOffset;
 }
 
-ultrasonic.prototype.sendString = function(str, cb) {
+Ultrasonic.prototype.sendString = function(str, cb) {
 	var currentIndex = 0;
-	// TODO: base64
-	var str = this.startChar + str + this.endChar;
-
-	console.log(str);
+	
+	var str = this.startChar + base64encode(str) + this.endChar;
 
 	var playChar = function() {
 		if(currentIndex === str.length) return cb();
+
 		this.sendChar(str[currentIndex], playChar);
 		currentIndex++;
 	}.bind(this);
@@ -63,68 +71,65 @@ ultrasonic.prototype.sendString = function(str, cb) {
 	playChar();
 }
 
-ultrasonic.prototype.sendChar = function(char, cb) {
+Ultrasonic.prototype.sendChar = function(char, cb) {
 	var freq = this._charToFreq(char);
 	var cmd = 'play -n synth ' + this.toneLength + ' sin ' + freq;
-
-	console.log(char);
-
 
 	exec(cmd, function(err, stdout, stderr) {
       cb();
     });
 }
 
-ultrasonic.prototype.createReadStream = function() {
+Ultrasonic.prototype.createReadStream = function() {
 	console.error('not yet implemented');
 }
 
-ultrasonic.prototype.createWriteStream = function() {
+Ultrasonic.prototype.createWriteStream = function() {
 	var stream = new Stream();
+
 	stream.writable = true;
 	stream.readable = false;
 	stream.paused = false;
 	stream.sentStartChar = false;
 	stream.processing = false;
 	stream.queue = [];
-
-	var us = this;
+	stream.us = this;
 
 	stream.write = function(data) {
 		if(!this.sentStartChar) {
-			this.queue.push(us.sendChar.bind(us, us.initTransferChar));
+			this.sentStartChar = true;
+
+			this.queue.push(this.us.sendChar.bind(this.us, this.us.initTransferChar));
 		}
 
 		// TODO: split into chunks
-		this.queue.push(us.sendString.bind(us, data));
+		this.queue.push(this.us.sendString.bind(this.us, data));
 
 		if(!this.processing) {
-			this.processQueue();
+			setTimeout(this.processQueue.bind(this), 0);
 			this.processing = true;
 		}
 	}
 
 	stream.end = function() {
-		this.queue.push(us.sendChar.bind(us, us.endTrasferChar));
+		this.queue.push(this.us.sendChar.bind(this.us, this.us.endTransferChar));
 		if(!this.processing) {
-			this.processQueue();
+			setTimeout(this.processQueue.bind(this), 0);
 			this.processing = true;
 		}
 	}
 
 	stream.processQueue = function() {
-		console.log('processing queue');
-
 		if(this.queue.length === 0) {
 			this.processing = false;
 			return;
 		}
 
-		var func = this.queue.pop();
+		var func = this.queue.shift();
 		func(this.processQueue.bind(this));
 	}
 
 	return stream;
 }
 
-module.exports = new ultrasonic();
+module.exports = new Ultrasonic();
