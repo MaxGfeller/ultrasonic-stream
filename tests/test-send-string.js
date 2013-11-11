@@ -1,6 +1,7 @@
 'use strict';
+var ultrasonic = require('../index.js');
 
-var ultrasonic = new (require('../index.js'))({
+ultrasonic.configure({
 	freqMin: 200,
 	freqMax: 600
 });

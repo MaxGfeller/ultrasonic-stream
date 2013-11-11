@@ -1,9 +1,11 @@
 'use strict';
 
-var ultrasonic = new (require('../index.js'))({
+var ultrasonic = require('../index.js');
+
+ultrasonic.configure({
 	freqMin: 200,
 	freqMax: 600
-});
+}); 
 
 // ultrasonic.sendChar('a', function() {
 // 	console.log('sent');
