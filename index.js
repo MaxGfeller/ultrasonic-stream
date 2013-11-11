@@ -10,7 +10,7 @@ var Ultrasonic = function() {
 	this.initTransferChar = '?';
 	this.endTransferChar = '*';
 	this.charList = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';
-	this.toneLength = 0.03;
+	this.toneLength = 0.02;
 	this.freqMin = 18000;
 	this.freqMax = 20000;
 	this.chunkSize = 8;
